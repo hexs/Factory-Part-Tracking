@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Part Tracking HUD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-[#020617] h-screen w-screen overflow-hidden text-white font-mono relative">
+
+<!-- ทดสอบ API ผ่านหน้าเว็บ -->
+<div class="absolute top-4 left-4 z-50 bg-gray-900/80 p-4 border border-cyan-800 rounded-lg backdrop-blur-md">
+    <h3 class="text-cyan-400 font-bold mb-2">Test Transfer</h3>
+    <div class="flex gap-2 mb-2">
+        <input id="test-part" type="text" value="PCB 1"
+               class="bg-gray-800 border border-gray-600 px-2 py-1 rounded w-24 text-sm" placeholder="Part ID">
+        <input id="test-qty" type="number" value="1"
+               class="bg-gray-800 border border-gray-600 px-2 py-1 rounded w-16 text-sm">
+    </div>
+    <button onclick="testTransfer('Material in', 'SMT')"
+            class="bg-cyan-900 hover:bg-cyan-700 text-cyan-100 border border-cyan-500 px-3 py-1 rounded text-sm w-full mb-1">
+        Transfer to SMT
+    </button>
+</div>
+
+<div id="canvas" class="w-full h-full relative">
+    <div id="Material in" class="station-node absolute top-[40%] left-[5%]">
+        <div class="node-title">Material In</div>
+        <div class="inventory-list" id="inventory-Material in"></div>
+    </div>
+
+    <div id="SMT" class="station-node absolute top-[15%] left-[25%]">
+        <div class="node-title">SMT Station</div>
+        <div class="inventory-list" id="inventory-SMT"></div>
+    </div>
+
+    <div id="Forming" class="station-node absolute top-[65%] left-[25%]">
+        <div class="node-title">Forming Area</div>
+        <div class="inventory-list" id="inventory-Forming"></div>
+    </div>
+
+    <div id="Assembly" class="station-node absolute top-[40%] left-[45%]">
+        <div class="node-title">Assembly Line</div>
+        <div class="inventory-list" id="inventory-Assembly"></div>
+    </div>
+
+    <div id="Cutting" class="station-node absolute top-[40%] left-[70%]">
+        <div class="node-title">Cutting Machine</div>
+        <div class="inventory-list" id="inventory-Cutting"></div>
+    </div>
+
+    <div id="Material out" class="station-node absolute top-[70%] left-[70%]">
+        <div class="node-title">Material Out</div>
+        <div class="inventory-list" id="inventory-Material out"></div>
+    </div>
+</div>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leader-line-new@1.1.9/leader-line.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="/static/script.js"></script>
+</body>
+</html>
