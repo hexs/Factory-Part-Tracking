@@ -1,0 +1,88 @@
+{
+    "stations": {
+        "Material in": {
+            "x": 66,
+            "y": 395,
+            "inventory": {
+                "PCB 1": 8,
+                "part A": 258,
+                "part B": 260,
+                "part AA": -1
+            }
+        },
+        "SMT": {
+            "x": 418,
+            "y": 268,
+            "inventory": {
+                "PCB 1": 2,
+                "part A": 2,
+                "part AA": 1,
+                "PCBA 1": 0
+            }
+        },
+        "Forming": {
+            "x": 413,
+            "y": 604,
+            "inventory": {
+                "part B": 0,
+                "part B2": 0
+            }
+        },
+        "Assembly": {
+            "x": 800,
+            "y": 451,
+            "inventory": {
+                "PCBA 1": 0,
+                "part B2": 0,
+                "part C": 0
+            }
+        },
+        "Cutting": {
+            "x": 1158,
+            "y": 439,
+            "inventory": {
+                "part C": 0,
+                "part C2": 0
+            }
+        },
+        "Material out": {
+            "x": 1595,
+            "y": 430,
+            "inventory": {
+                "part C2": 80
+            }
+        }
+    },
+    "connections": [
+        {
+            "id": "Material in-SMT",
+            "source": "Material in",
+            "target": "SMT"
+        },
+        {
+            "id": "Material in-Forming",
+            "source": "Material in",
+            "target": "Forming"
+        },
+        {
+            "id": "SMT-Assembly",
+            "source": "SMT",
+            "target": "Assembly"
+        },
+        {
+            "id": "Forming-Assembly",
+            "source": "Forming",
+            "target": "Assembly"
+        },
+        {
+            "id": "Assembly-Cutting",
+            "source": "Assembly",
+            "target": "Cutting"
+        },
+        {
+            "id": "Cutting-Material out",
+            "source": "Cutting",
+            "target": "Material out"
+        }
+    ]
+}

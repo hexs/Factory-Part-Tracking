@@ -1,23 +1,64 @@
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO
+import json
+import os
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+DATA_FILE = 'factory_data.json'
+
+DEFAULT_DATA = {
+    "stations": {
+        "Material in": {"x": 50, "y": 200, "inventory": {"PCB 1": 10, "part A": 100, "part B": 100}},
+        "SMT": {"x": 300, "y": 50, "inventory": {}},
+        "Forming": {"x": 300, "y": 350, "inventory": {}},
+        "Assembly": {"x": 550, "y": 200, "inventory": {}},
+        "Cutting": {"x": 800, "y": 200, "inventory": {}},
+        "Material out": {"x": 1050, "y": 200, "inventory": {}}
+    },
+    "connections": [
+        {"id": "Material in-SMT", "source": "Material in", "target": "SMT"},
+        {"id": "Material in-Forming", "source": "Material in", "target": "Forming"},
+        {"id": "SMT-Assembly", "source": "SMT", "target": "Assembly"},
+        {"id": "Forming-Assembly", "source": "Forming", "target": "Assembly"},
+        {"id": "Assembly-Cutting", "source": "Assembly", "target": "Cutting"},
+        {"id": "Cutting-Material out", "source": "Cutting", "target": "Material out"}
+    ]
+}
+
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return DEFAULT_DATA
+
+
+def save_data(data):
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
+
+factory_data = load_data()
+
 
 class Station:
-    def __init__(self, name):
+    def __init__(self, name, ref_data):
         self.name = name
-        self.inventory = {}
+        self.inventory = ref_data['inventory']
 
     def add_item(self, part_id, quantity):
         if part_id not in self.inventory:
             self.inventory[part_id] = 0
         self.inventory[part_id] += quantity
+        save_data(factory_data)
 
     def remove_item(self, part_id, quantity):
-        if part_id in self.inventory:
-            self.inventory[part_id] -= quantity
+        if part_id not in self.inventory:
+            self.inventory[part_id] = 0
+        self.inventory[part_id] -= quantity
+        save_data(factory_data)
 
     def transfer(self, target_station, part_id, quantity):
         self.remove_item(part_id, quantity)
@@ -30,22 +71,11 @@ class Station:
             self.add_item(part_id, quantity * batch_size)
 
 
-stations = {
-    'Material in': Station('Material in'),
-    'SMT': Station('SMT'),
-    'Forming': Station('Forming'),
-    'Assembly': Station('Assembly'),
-    'Cutting': Station('Cutting'),
-    'Material out': Station('Material out')
-}
-
-stations['Material in'].add_item('PCB 1', 10)
-stations['Material in'].add_item('part A', 100)
-stations['Material in'].add_item('part B', 100)
+stations = {name: Station(name, info) for name, info in factory_data["stations"].items()}
 
 
 def get_inventory_state():
-    return {name: station.inventory for name, station in stations.items()}
+    return {name: info["inventory"] for name, info in factory_data["stations"].items()}
 
 
 @app.route('/')
@@ -53,9 +83,23 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/api/state', methods=['GET'])
-def get_state():
-    return jsonify(get_inventory_state())
+@app.route('/api/layout', methods=['GET'])
+def get_layout():
+    # ส่งข้อมูลทั้งหมดให้หน้าเว็บตอนโหลด
+    return jsonify(factory_data)
+
+
+@app.route('/api/save_position', methods=['POST'])
+def save_position():
+    data = request.json
+    station_id = data.get('station_id')
+
+    if station_id in factory_data["stations"]:
+        factory_data["stations"][station_id]["x"] = data.get('x')
+        factory_data["stations"][station_id]["y"] = data.get('y')
+        save_data(factory_data)
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
 
 
 @app.route('/api/add', methods=['POST'])
